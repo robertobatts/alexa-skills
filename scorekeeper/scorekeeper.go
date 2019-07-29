@@ -10,8 +10,12 @@ import (
 )
 
 type OutputSpeech struct {
-	Type string `json:"type"`
-	Text string `json:"text"`
+	Type string `json:"type,omitempty"`
+	Text string `json:"text,omitempty"`
+}
+
+type Reprompt struct {
+	OutputSpeech OutputSpeech `json:"outputSpeech"`
 }
 
 type AlexaRequest struct {
@@ -29,10 +33,9 @@ type AlexaRequest struct {
 type AlexaResponse struct {
 	Version  string `json:"version"`
 	Response struct {
-		OutputSpeech OutputSpeech `json:"outputSpeech"`
-		Reprompt struct {
-			OutputSpeech OutputSpeech `json:outputSpeech`
-		} `json:"reprompt"`
+		OutputSpeech *OutputSpeech `json:"outputSpeech,omitempty"`
+		Reprompt *Reprompt `json:"reprompt,omitempty"`
+		ShouldEndSession bool `json:"shouldEndSession,omitempty"`
 	} `json:"response"`
 }
 
@@ -43,13 +46,20 @@ func CreateResponse() *AlexaResponse {
 }
 
 func (resp *AlexaResponse) Say(text string) {
-	resp.Response.OutputSpeech.Type = "PlainText"
-	resp.Response.OutputSpeech.Text = text
+	resp.Response.OutputSpeech = &OutputSpeech {
+		Type: "PlainText",
+		Text: text,
+	}
 }
 
 func (resp *AlexaResponse) Ask(text string) {
-	resp.Response.Reprompt.OutputSpeech.Type = "PlainText"
-	resp.Response.Reprompt.OutputSpeech.Text = text
+	resp.Response.Reprompt = &Reprompt {
+		OutputSpeech: OutputSpeech{
+			Type: "PlainText",
+			Text: text,
+		},
+	}
+	resp.Response.ShouldEndSession = false
 }
 
 func HandleRequest(ctx context.Context, i AlexaRequest) (AlexaResponse, error) {
