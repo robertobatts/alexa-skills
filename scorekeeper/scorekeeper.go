@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/davecgh/go-spew/spew"
@@ -86,28 +85,33 @@ func (resp *AlexaResponse) Ask(text string) {
 	resp.Response.ShouldEndSession = false
 }
 
-func (resp *AlexaResponse) HandlePlayersNumber(req AlexaRequest) {
+/*func (resp *AlexaResponse) SavePlayerNumbers(req AlexaRequest) {
 	resp.SessionAttributes = map[string]string {
 		"number": req.Request.Intent.Slots["number"].Value,
 	}
-}
+}*/
 
 func HandleRequest(ctx context.Context, req AlexaRequest) (AlexaResponse, error) {
 	// Use Spew to output the request for debugging purposes:
 	fmt.Println("---- Dumping Input Map: ----")
 	spew.Dump(req)
 
-	// Example of accessing map value via index:
-	log.Printf("Request type is ", req.Request.Intent.Name)
-
-	// Create a response object
 	resp := CreateResponse()
 
-	// Customize the response for each Alexa Intent
-	switch req.Request.Intent.Name {
-	case "howmanyplayers":
-		resp.HandlePlayersNumber(req);
+
+	if req.Request.Type == "LaunchRequest" {
 		resp.Ask("What are the players names?")
+		
+		return *resp, nil
+	}
+
+	
+	switch req.Request.Intent.Name {
+	/*case "howmanyplayers":
+		resp.SavePlayerNumbers(req);
+		resp.Ask("What are the players names?")*/
+	case "playername":
+
 	case "AMAZON.HelpIntent":
 		resp.Say("")
 		//TODO
