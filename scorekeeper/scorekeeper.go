@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
-
+	"dynago"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/davecgh/go-spew/spew"
 )
@@ -41,6 +41,11 @@ type Resolutions struct {
 
 type AlexaRequest struct {
 	Version string `json:"version"`
+	Session struct {
+		User struct {
+			UserId string	`json:"userId"`
+		} `json:"userId"`
+	} `json:"session"`
 	Request struct {
 		Type   string `json:"type"`
 		Time   string `json:"timestamp"`
@@ -91,6 +96,22 @@ func (resp *AlexaResponse) Ask(text string) {
 	}
 }*/
 
+
+func SavePlayerName(req AlexaRequest) {
+	name := req.Request.Intent.Slots["name"].Value
+	userId :=  req.Session.User.UserId
+
+	playerScore := dynago.PlayerScore {
+		PK: userId + "_" + name,
+		Name: name,
+		UserId: userId,
+	}
+
+	svc := dynago.GetDynamoInstance()
+	dynago.InsertItem(svc, playerScore)
+
+}
+
 func HandleRequest(ctx context.Context, req AlexaRequest) (AlexaResponse, error) {
 	// Use Spew to output the request for debugging purposes:
 	fmt.Println("---- Dumping Input Map: ----")
@@ -111,7 +132,7 @@ func HandleRequest(ctx context.Context, req AlexaRequest) (AlexaResponse, error)
 		resp.SavePlayerNumbers(req);
 		resp.Ask("What are the players names?")*/
 	case "playername":
-
+		SavePlayerName(req);
 	case "AMAZON.HelpIntent":
 		resp.Say("")
 		//TODO

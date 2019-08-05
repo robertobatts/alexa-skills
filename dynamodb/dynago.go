@@ -1,4 +1,4 @@
-package main 
+package dynago 
 
 import (
 	"fmt"
@@ -11,10 +11,11 @@ import (
 )
 
 type PlayerScore struct {
-	Name string
-	Score int
-	UserId string
-	EndDate time.Time
+	PK string 					`json:"PK"`
+	Name string 				`json:"NAME"`
+	Score int 					`json:"SCORE"`
+	UserId string 			`json:"USER_ID"`
+	EndDate *time.Time	`json:"END_DATE,omitempty"`
 }
 
 func CreateNewSession() *session.Session {
@@ -24,16 +25,20 @@ func CreateNewSession() *session.Session {
 	return sess
 }
 
+func GetDynamoInstance() *dynamodb.DynamoDB {
+	sess := CreateNewSession()
+	fmt.Print((sess.Config.Credentials.Get()))
+	return dynamodb.New(sess)
+}
+
 
 func main() {
 
-	sess := CreateNewSession()
-	fmt.Print((sess.Config.Credentials.Get()))
-
-	svc := dynamodb.New(sess)
+	svc := GetDynamoInstance()
 	fmt.Println(svc)
 
 	playerScore := PlayerScore {
+		PK: "TEST_1",
 		Name: "Roberto",
 		Score: 12,
 		UserId: "TEST",
