@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"strings"
 	"dynago"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/davecgh/go-spew/spew"
@@ -44,7 +45,7 @@ type AlexaRequest struct {
 	Session struct {
 		User struct {
 			UserId string	`json:"userId"`
-		} `json:"userId"`
+		} `json:"user"`
 	} `json:"session"`
 	Request struct {
 		Type   string `json:"type"`
@@ -102,7 +103,7 @@ func SavePlayerName(req AlexaRequest) {
 	userId :=  req.Session.User.UserId
 
 	playerScore := dynago.PlayerScore {
-		PK: userId + "_" + name,
+		PK: userId + "_" + strings.ToUpper(name),
 		Name: name,
 		UserId: userId,
 	}
