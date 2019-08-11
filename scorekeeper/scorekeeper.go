@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
-	"dynago"
+	"github.com/robertobatts/dynago"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/davecgh/go-spew/spew"
 )
