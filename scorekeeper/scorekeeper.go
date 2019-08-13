@@ -3,10 +3,11 @@ package main
 import (
 	"context"
 	"fmt"
-	"strings"
-	"github.com/robertobatts/dynago"
+	"time"
+
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/davecgh/go-spew/spew"
+	"github.com/robertobatts/dynago"
 )
 
 type OutputSpeech struct {
@@ -68,6 +69,14 @@ type AlexaResponse struct {
 	} `json:"response"`
 }
 
+type PlayerScore struct {
+	PK      string     `json:"PK,omitempty"`
+	Name    string     `json:"NAME,omitempty"`
+	Score   int        `json:"SCORE,omitempty"`
+	UserId  string     `json:"USER_ID,omitempty"`
+	EndDate *time.Time `json:"END_DATE,omitempty"`
+}
+
 func CreateResponse() *AlexaResponse {
 	var resp AlexaResponse
 	resp.Version = "1.0"
@@ -75,14 +84,14 @@ func CreateResponse() *AlexaResponse {
 }
 
 func (resp *AlexaResponse) Say(text string) {
-	resp.Response.OutputSpeech = &OutputSpeech {
+	resp.Response.OutputSpeech = &OutputSpeech{
 		Type: "PlainText",
 		Text: text,
 	}
 }
 
 func (resp *AlexaResponse) Ask(text string) {
-	resp.Response.Reprompt = &Reprompt {
+	resp.Response.Reprompt = &Reprompt{
 		OutputSpeech: OutputSpeech{
 			Type: "PlainText",
 			Text: text,
@@ -101,7 +110,7 @@ func (resp *AlexaResponse) SaveNewPlayer(req AlexaRequest) {
 	name := req.Request.Intent.Slots["name"].Value
 	userId := req.Session.User.UserId
 
-	playerScore := dynago.PlayerScore{
+	playerScore := PlayerScore{
 		PK:     userId + "_" + name,
 		Name:   name,
 		UserId: userId,
@@ -128,15 +137,11 @@ func (resp *AlexaResponse) UpdatePlayerScore(req AlexaRequest) {
 	name := req.Request.Intent.Slots["name"].Value
 	userId := req.Session.User.UserId
 
-	playerScore := dynago.PlayerScore{
-		PK:     userId + "_" + name,
-		Name:   name,
-		Score:  score,
-		UserId: userId,
-	}
+	keys := dynago.PlayerScore{PK: userId + "_" + name}
+	values := map[string]int{":score": 23}
 
 	svc := dynago.GetDynamoInstance()
-	err := dynago.UpdateItem(svc, playerScore, "PLAYERSCORE")
+	err := dynago.UpdateItem(svc, values, keys, "PLAYERSCORE", "set SCORE = SCORE + :score")
 
 	text := ""
 	if err != nil {
