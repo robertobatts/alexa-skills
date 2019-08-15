@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"time"
+	"strconv"
 
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/davecgh/go-spew/spew"
@@ -133,15 +134,15 @@ func (resp *AlexaResponse) SaveNewPlayer(req AlexaRequest) {
 }
 
 func (resp *AlexaResponse) UpdatePlayerScore(req AlexaRequest) {
-	score := req.Request.Intent.Slots["score"].Value
+	score, err := strconv.Atoi(req.Request.Intent.Slots["score"].Value)
 	name := req.Request.Intent.Slots["name"].Value
 	userId := req.Session.User.UserId
 
-	keys := dynago.PlayerScore{PK: userId + "_" + name}
-	values := map[string]int{":score": 23}
+	keys := PlayerScore{PK: userId + "_" + name}
+	values := map[string]int{":score": score}
 
 	svc := dynago.GetDynamoInstance()
-	err := dynago.UpdateItem(svc, values, keys, "PLAYERSCORE", "set SCORE = SCORE + :score")
+	err = dynago.UpdateItem(svc, values, keys, "PLAYERSCORE", "set SCORE = SCORE + :score")
 
 	text := ""
 	if err != nil {
