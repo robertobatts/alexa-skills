@@ -8,7 +8,7 @@ import (
 
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/davecgh/go-spew/spew"
-	"github.com/robertobatts/dynago"
+	"dynamodb"
 )
 
 type OutputSpeech struct {
@@ -117,8 +117,8 @@ func (resp *AlexaResponse) SaveNewPlayer(req AlexaRequest) {
 		UserId: userId,
 	}
 
-	svc := dynago.GetDynamoInstance()
-	err := dynago.InsertItem(svc, playerScore, "PLAYERSCORE")
+	svc := dynamodb.GetDynamoInstance()
+	err := dynamodb.InsertItem(svc, playerScore, "PLAYERSCORE")
 
 	text := ""
 	if err != nil {
@@ -141,8 +141,8 @@ func (resp *AlexaResponse) UpdatePlayerScore(req AlexaRequest) {
 	keys := PlayerScore{PK: userId + "_" + name}
 	values := map[string]int{":score": score}
 
-	svc := dynago.GetDynamoInstance()
-	err = dynago.UpdateItem(svc, values, keys, "PLAYERSCORE", "set SCORE = SCORE + :score")
+	svc := dynamodb.GetDynamoInstance()
+	_, err = dynamodb.UpdateItem(svc, values, keys, "PLAYERSCORE", "set SCORE = SCORE + :score")
 
 	text := ""
 	if err != nil {
