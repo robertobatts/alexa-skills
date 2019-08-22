@@ -157,6 +157,10 @@ func (resp *AlexaResponse) UpdatePlayerScore(req AlexaRequest) {
 	resp.Response.ShouldEndSession = false
 }
 
+func (resp *AlexaResponse) ReadScore(req AlexaRequest) {
+
+}
+
 func HandleRequest(ctx context.Context, req AlexaRequest) (AlexaResponse, error) {
 	// Use Spew to output the request for debugging purposes:
 	fmt.Println("---- Dumping Input Map: ----")
@@ -171,13 +175,12 @@ func HandleRequest(ctx context.Context, req AlexaRequest) (AlexaResponse, error)
 	}
 
 	switch req.Request.Intent.Name {
-	/*case "howmanyplayers":
-	resp.SavePlayerNumbers(req);
-	resp.Ask("What are the players names?")*/
-	case "playername":
+	case "addplayer":
 		resp.SaveNewPlayer(req)
-	case "playerscore":
+	case "addscore":
 		resp.UpdatePlayerScore(req)
+	case "readscore":
+		resp.ReadScore(req)
 	case "AMAZON.HelpIntent":
 		resp.Say("")
 		//TODO

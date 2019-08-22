@@ -20,19 +20,6 @@ func GetDynamoInstance() *dynamodb.DynamoDB {
 	return dynamodb.New(CreateNewSession())
 }
 
-func main() {
-
-	svc := GetDynamoInstance()
-
-	values := map[string]int{
-		":score": 23,
-	}
-
-	keys := map[string]string{"PK": "TEST_5"}
-
-	UpdateItem(svc, values, keys, "PLAYERSCORE", "set SCORE = SCORE + :score")
-}
-
 func InsertItem(svc *dynamodb.DynamoDB, item interface{}, tableName string) error {
 	av, err := dynamodbattribute.MarshalMap(item)
 
@@ -58,12 +45,12 @@ func UpdateItem(svc *dynamodb.DynamoDB, values interface{}, keys interface{}, ta
 	marshalledValues, _ := dynamodbattribute.MarshalMap(values)
 	marshalledKeys, _ := dynamodbattribute.MarshalMap(keys)
 
-	input := &dynamodb.UpdateItemInput{
-		ExpressionAttributeValues: marshalledValues,
-		TableName:                 aws.String(tableName),
-		Key:                       marshalledKeys,
-		ReturnValues:              aws.String("UPDATED_NEW"),
-		UpdateExpression:          aws.String(updateExp),
+	input := &dynamodb.UpdateItemInput {
+		ExpressionAttributeValues: 	marshalledValues,
+		TableName:                 	aws.String(tableName),
+		Key:                       	marshalledKeys,
+		ReturnValues:              	aws.String("UPDATED_NEW"),
+		UpdateExpression:          	aws.String(updateExp),
 	}
 
 	newItem, err := svc.UpdateItem(input)
@@ -73,4 +60,27 @@ func UpdateItem(svc *dynamodb.DynamoDB, values interface{}, keys interface{}, ta
 		fmt.Println(err.Error())
 	}
 	return newItem, err
+}
+
+func SelectItems(svc *dynamodb.DynamoDB, values interface{}, tableName string, 
+	queryExp string, indexName string) ([]map[string]*dynamodb.AttributeValue, error) {
+	marshalledValues, _ := dynamodbattribute.MarshalMap(values)
+
+	params := &dynamodb.QueryInput {
+		ExpressionAttributeValues:	marshalledValues,
+		KeyConditionExpression:			aws.String(queryExp),
+		TableName: 									aws.String(tableName),
+		IndexName:									aws.String(indexName),
+	}
+
+	result, err := svc.Query(params)
+
+	if err != nil {
+		fmt.Println("Error calling GetItem:")
+		fmt.Println(err.Error())
+		return nil, err
+	}
+
+
+	return result.Items, err
 }
