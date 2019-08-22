@@ -20,7 +20,7 @@ func main() {
 
 }
 
-func TestSelectItems(t *testing.T) {
+func TestQuery(t *testing.T) {
 	userId := "amzn1.ask.account.AHPJZMV4MAXNKAXO7MWZAGW7Y6HEOUV2UC6UWPOYNTUTRNQCJTKX7O6PME3ECF23PDIIAEZ7YQ2H4HGCH6B6QTZEONRPDHP3V7RXFMCWP2TP6FLDRXV6OR34TTQV4TL42AHUI5M4QSTA5YGXPERE33WRLGLIZI5Y45O6SEH237MALBKA2PPH7OS7IR6AEAN65UB2HNISOAEX6CA"
 
 	values := map[string]string{":userId": userId}
@@ -28,7 +28,7 @@ func TestSelectItems(t *testing.T) {
 	queryExp := "USER_ID = :userId"
 
 	svc := dynamodb.GetDynamoInstance()
-	results, err := dynamodb.SelectItems(svc, values, "PLAYERSCORE", queryExp, "userId-index")
+	results, err := dynamodb.Query(svc, values, "PLAYERSCORE", queryExp, "userId-index")
 
 	if err != nil {
 		t.Errorf("Error calling SelectItems:" + err.Error())

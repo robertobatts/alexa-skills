@@ -8,6 +8,7 @@ import (
 
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/davecgh/go-spew/spew"
+	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"dynamodb"
 )
 
@@ -122,15 +123,10 @@ func (resp *AlexaResponse) SaveNewPlayer(req AlexaRequest) {
 
 	text := ""
 	if err != nil {
+		fmt.Println(err.Error())
 		text = "There has been an error! Try again"
 	}
-	resp.Response.Reprompt = &Reprompt{
-		OutputSpeech: OutputSpeech{
-			Type: "PlainText",
-			Text: text,
-		},
-	}
-	resp.Response.ShouldEndSession = false
+	resp.Ask(text)
 }
 
 func (resp *AlexaResponse) UpdatePlayerScore(req AlexaRequest) {
@@ -146,19 +142,41 @@ func (resp *AlexaResponse) UpdatePlayerScore(req AlexaRequest) {
 
 	text := ""
 	if err != nil {
+		fmt.Println(err.Error())
 		text = "There has been an error! Try again"
 	}
-	resp.Response.Reprompt = &Reprompt{
-		OutputSpeech: OutputSpeech{
-			Type: "PlainText",
-			Text: text,
-		},
-	}
-	resp.Response.ShouldEndSession = false
+	resp.Ask(text)
 }
 
 func (resp *AlexaResponse) ReadScore(req AlexaRequest) {
+	userId := req.Session.User.UserId
+	values := map[string]string{":userId": userId}
 
+	queryExp := "USER_ID = :userId"
+
+	svc := dynamodb.GetDynamoInstance()
+	results, err := dynamodb.Query(svc, values, "PLAYERSCORE", queryExp, "userId-index")
+
+	text := ""
+	if err != nil {
+		fmt.Println(err.Error())
+		text = "There has been an error! Try again"
+	} else {
+		for _, i := range results {
+			item := PlayerScore{}
+
+			err = dynamodbattribute.UnmarshalMap(i, &item)
+
+			if err != nil {
+					fmt.Println("Got error unmarshalling:")
+					fmt.Println(err.Error())
+			} else {
+				text += item.Name + " has " + strconv.Itoa(item.Score) + " points, "
+			}	
+			
+		}
+	}
+	resp.Say(text)
 }
 
 func HandleRequest(ctx context.Context, req AlexaRequest) (AlexaResponse, error) {

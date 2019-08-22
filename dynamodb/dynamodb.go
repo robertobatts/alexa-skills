@@ -62,7 +62,7 @@ func UpdateItem(svc *dynamodb.DynamoDB, values interface{}, keys interface{}, ta
 	return newItem, err
 }
 
-func SelectItems(svc *dynamodb.DynamoDB, values interface{}, tableName string, 
+func Query(svc *dynamodb.DynamoDB, values interface{}, tableName string, 
 	queryExp string, indexName string) ([]map[string]*dynamodb.AttributeValue, error) {
 	marshalledValues, _ := dynamodbattribute.MarshalMap(values)
 
