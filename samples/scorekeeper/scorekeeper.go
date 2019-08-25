@@ -23,14 +23,14 @@ type PlayerScore struct {
 }
 
 
-/*func (resp *golexa.Response) SavePlayerNumbers(req golexa.Request) {
+/*func (resp *golexa.AlexaResponse) SavePlayerNumbers(req golexa.AlexaRequest) {
 	resp.SessionAttributes = map[string]string {
 		"number": req.Request.Intent.Slots["number"].Value,
 	}
 }*/
 
 //SaveNewPlayer saves the player name on dynamodb, then ask again the user for other players
-func SaveNewPlayer(req golexa.Request, resp *golexa.Response) {
+func SaveNewPlayer(req golexa.AlexaRequest, resp *golexa.AlexaResponse) {
 	name := req.Request.Intent.Slots["name"].Value
 	userID := req.Session.User.UserID
 
@@ -52,7 +52,7 @@ func SaveNewPlayer(req golexa.Request, resp *golexa.Response) {
 }
 
 //UpdatePlayerScore updates the player's score, then wait for the user to take other scores
-func UpdatePlayerScore(req golexa.Request, resp *golexa.Response) {
+func UpdatePlayerScore(req golexa.AlexaRequest, resp *golexa.AlexaResponse) {
 	score, err := strconv.Atoi(req.Request.Intent.Slots["score"].Value)
 	name := req.Request.Intent.Slots["name"].Value
 	userID := req.Session.User.UserID
@@ -72,7 +72,7 @@ func UpdatePlayerScore(req golexa.Request, resp *golexa.Response) {
 }
 
 //ReadScore reads the scores of all the players associated to the alexa's userID
-func ReadScore(req golexa.Request, resp *golexa.Response) {
+func ReadScore(req golexa.AlexaRequest, resp *golexa.AlexaResponse) {
 	userID := req.Session.User.UserID
 	values := map[string]string{":userID": userID}
 
@@ -104,7 +104,7 @@ func ReadScore(req golexa.Request, resp *golexa.Response) {
 }
 
 //HandlerRequest is the handler function of lambda
-func HandleRequest(ctx context.Context, req golexa.Request) (golexa.Response, error) {
+func HandleRequest(ctx context.Context, req golexa.AlexaRequest) (golexa.AlexaResponse, error) {
 	// Use Spew to output the request for debugging purposes:
 	fmt.Println("---- Dumping Input Map: ----")
 	spew.Dump(req)
