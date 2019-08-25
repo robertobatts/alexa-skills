@@ -9,6 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 )
 
+//CreateNewSession creates a new dynamodb session
 func CreateNewSession() *session.Session {
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigEnable,
@@ -16,10 +17,12 @@ func CreateNewSession() *session.Session {
 	return sess
 }
 
+//GetDynamoInstance returns a new dynamodb session instance
 func GetDynamoInstance() *dynamodb.DynamoDB {
 	return dynamodb.New(CreateNewSession())
 }
 
+//InsertItem inserts an item into a table
 func InsertItem(svc *dynamodb.DynamoDB, item interface{}, tableName string) error {
 	av, err := dynamodbattribute.MarshalMap(item)
 
@@ -40,6 +43,7 @@ func InsertItem(svc *dynamodb.DynamoDB, item interface{}, tableName string) erro
 	return err
 }
 
+//UpdateItem updates an item of a table
 func UpdateItem(svc *dynamodb.DynamoDB, values interface{}, keys interface{}, tableName string, 
 	updateExp string) (*dynamodb.UpdateItemOutput, error) {
 	marshalledValues, _ := dynamodbattribute.MarshalMap(values)
@@ -62,6 +66,7 @@ func UpdateItem(svc *dynamodb.DynamoDB, values interface{}, keys interface{}, ta
 	return newItem, err
 }
 
+//Query selects the items from a table
 func Query(svc *dynamodb.DynamoDB, values interface{}, tableName string, 
 	queryExp string, indexName string) ([]map[string]*dynamodb.AttributeValue, error) {
 	marshalledValues, _ := dynamodbattribute.MarshalMap(values)

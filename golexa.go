@@ -5,15 +5,18 @@ import (
 )
 
 
+//OutputSpeech contains what Alexa says to the user
 type OutputSpeech struct {
 	Type string `json:"type,omitempty"`
 	Text string `json:"text,omitempty"`
 }
 
+//Reprompt containes what Alexa asks to the user
 type Reprompt struct {
 	OutputSpeech OutputSpeech `json:"outputSpeech"`
 }
 
+//IntentSlot contains an Alexa Slot
 type IntentSlot struct {
 	Name               string       `json:"name"`
 	ConfirmationStatus string       `json:"confirmationStatus,omitempty"`
@@ -21,6 +24,7 @@ type IntentSlot struct {
 	Resolutions        *Resolutions `json:"resolutions,omitempty"`
 }
 
+//Resolutions contain	extra properties of a slot
 type Resolutions struct {
 	ResolutionsPerAuthority []struct {
 		Authority string `json:"authority"`
@@ -36,6 +40,7 @@ type Resolutions struct {
 	} `json:"resolutionsPerAuthority"`
 }
 
+//Request defines the json passed from Alexa when the skill is called
 type Request struct {
 	Version string `json:"version"`
 	Session struct {
@@ -54,6 +59,7 @@ type Request struct {
 	} `json:"request"`
 }
 
+//Response defines the json passed to Alexa 
 type Response struct {
 	Version           string            `json:"version"`
 	SessionAttributes map[string]string `json:"sessionAttributes,omitempty"`
@@ -64,12 +70,14 @@ type Response struct {
 	} `json:"response"`
 }
 
+//CreateResponse initialize the Alexa Response
 func CreateResponse() *Response {
 	var resp Response
 	resp.Version = "1.0"
 	return &resp
 }
 
+//Say make Alexa say something to the user
 func (resp *Response) Say(text string) {
 	resp.Response.OutputSpeech = &OutputSpeech{
 		Type: "PlainText",
@@ -77,6 +85,7 @@ func (resp *Response) Say(text string) {
 	}
 }
 
+//Ask make Alexa ask something to the user
 func (resp *Response) Ask(text string) {
 	resp.Response.Reprompt = &Reprompt{
 		OutputSpeech: OutputSpeech{
@@ -87,6 +96,7 @@ func (resp *Response) Ask(text string) {
 	resp.Response.ShouldEndSession = false
 }
 
+//LambdaStart pass the function to be triggered to lambda
 func LambdaStart(handlerFunc interface{}) {
 	lambda.Start(handlerFunc)
 }

@@ -1,10 +1,9 @@
-package main
+package dynamodb
 
 import (
 	"fmt"
 	"time"
 	"testing"
-	"../dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 )
 
@@ -28,8 +27,8 @@ func TestQuery(t *testing.T) {
 
 	queryExp := "USER_ID = :userID"
 
-	svc := dynamodb.GetDynamoInstance()
-	results, err := dynamodb.Query(svc, values, "PLAYERSCORE", queryExp, "userId-index")
+	svc := GetDynamoInstance()
+	results, err := Query(svc, values, "PLAYERSCORE", queryExp, "userId-index")
 
 	if err != nil {
 		t.Errorf("Error calling SelectItems:" + err.Error())
