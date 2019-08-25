@@ -10,66 +10,9 @@ import (
 	"github.com/davecgh/go-spew/spew"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"dynamodb"
+	"golexa"
 )
 
-type OutputSpeech struct {
-	Type string `json:"type,omitempty"`
-	Text string `json:"text,omitempty"`
-}
-
-type Reprompt struct {
-	OutputSpeech OutputSpeech `json:"outputSpeech"`
-}
-
-type IntentSlot struct {
-	Name               string       `json:"name"`
-	ConfirmationStatus string       `json:"confirmationStatus,omitempty"`
-	Value              string       `json:"value"`
-	Resolutions        *Resolutions `json:"resolutions,omitempty"`
-}
-
-type Resolutions struct {
-	ResolutionsPerAuthority []struct {
-		Authority string `json:"authority"`
-		Status    struct {
-			Code string `json:"code"`
-		} `json:"status"`
-		Values []struct {
-			Value struct {
-				Name string `json:"name"`
-				ID   string `json:"id"`
-			} `json:"value"`
-		} `json:"values"`
-	} `json:"resolutionsPerAuthority"`
-}
-
-type AlexaRequest struct {
-	Version string `json:"version"`
-	Session struct {
-		User struct {
-			UserId string `json:"userId"`
-		} `json:"userId"`
-	} `json:"session"`
-	Request struct {
-		Type   string `json:"type"`
-		Time   string `json:"timestamp"`
-		Intent struct {
-			Name               string                `json:"name"`
-			ConfirmationStatus string                `json:"confirmationstatus"`
-			Slots              map[string]IntentSlot `json:"slots"`
-		} `json:"intent"`
-	} `json:"request"`
-}
-
-type AlexaResponse struct {
-	Version           string            `json:"version"`
-	SessionAttributes map[string]string `json:"sessionAttributes,omitempty"`
-	Response          struct {
-		OutputSpeech     *OutputSpeech `json:"outputSpeech,omitempty"`
-		Reprompt         *Reprompt     `json:"reprompt,omitempty"`
-		ShouldEndSession bool          `json:"shouldEndSession,omitempty"`
-	} `json:"response"`
-}
 
 type PlayerScore struct {
 	PK      string     `json:"PK,omitempty"`
@@ -79,36 +22,14 @@ type PlayerScore struct {
 	EndDate *time.Time `json:"END_DATE,omitempty"`
 }
 
-func CreateResponse() *AlexaResponse {
-	var resp AlexaResponse
-	resp.Version = "1.0"
-	return &resp
-}
 
-func (resp *AlexaResponse) Say(text string) {
-	resp.Response.OutputSpeech = &OutputSpeech{
-		Type: "PlainText",
-		Text: text,
-	}
-}
-
-func (resp *AlexaResponse) Ask(text string) {
-	resp.Response.Reprompt = &Reprompt{
-		OutputSpeech: OutputSpeech{
-			Type: "PlainText",
-			Text: text,
-		},
-	}
-	resp.Response.ShouldEndSession = false
-}
-
-/*func (resp *AlexaResponse) SavePlayerNumbers(req AlexaRequest) {
+/*func (resp *golexa.Response) SavePlayerNumbers(req golexa.Request) {
 	resp.SessionAttributes = map[string]string {
 		"number": req.Request.Intent.Slots["number"].Value,
 	}
 }*/
 
-func (resp *AlexaResponse) SaveNewPlayer(req AlexaRequest) {
+func SaveNewPlayer(req golexa.Request, resp *golexa.Response) {
 	name := req.Request.Intent.Slots["name"].Value
 	userId := req.Session.User.UserId
 
@@ -129,7 +50,7 @@ func (resp *AlexaResponse) SaveNewPlayer(req AlexaRequest) {
 	resp.Ask(text)
 }
 
-func (resp *AlexaResponse) UpdatePlayerScore(req AlexaRequest) {
+func UpdatePlayerScore(req golexa.Request, resp *golexa.Response) {
 	score, err := strconv.Atoi(req.Request.Intent.Slots["score"].Value)
 	name := req.Request.Intent.Slots["name"].Value
 	userId := req.Session.User.UserId
@@ -148,7 +69,7 @@ func (resp *AlexaResponse) UpdatePlayerScore(req AlexaRequest) {
 	resp.Ask(text)
 }
 
-func (resp *AlexaResponse) ReadScore(req AlexaRequest) {
+func ReadScore(req golexa.Request, resp *golexa.Response) {
 	userId := req.Session.User.UserId
 	values := map[string]string{":userId": userId}
 
@@ -179,12 +100,12 @@ func (resp *AlexaResponse) ReadScore(req AlexaRequest) {
 	resp.Say(text)
 }
 
-func HandleRequest(ctx context.Context, req AlexaRequest) (AlexaResponse, error) {
+func HandleRequest(ctx context.Context, req golexa.Request) (golexa.Response, error) {
 	// Use Spew to output the request for debugging purposes:
 	fmt.Println("---- Dumping Input Map: ----")
 	spew.Dump(req)
 
-	resp := CreateResponse()
+	resp := golexa.CreateResponse()
 
 	if req.Request.Type == "LaunchRequest" {
 		resp.Ask("What are the players names?")
@@ -194,11 +115,11 @@ func HandleRequest(ctx context.Context, req AlexaRequest) (AlexaResponse, error)
 
 	switch req.Request.Intent.Name {
 	case "addplayer":
-		resp.SaveNewPlayer(req)
+		SaveNewPlayer(req, resp)
 	case "addscore":
-		resp.UpdatePlayerScore(req)
+		UpdatePlayerScore(req, resp)
 	case "readscore":
-		resp.ReadScore(req)
+		ReadScore(req, resp)
 	case "AMAZON.HelpIntent":
 		resp.Say("")
 		//TODO
