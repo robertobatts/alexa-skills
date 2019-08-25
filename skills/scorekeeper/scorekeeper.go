@@ -6,7 +6,6 @@ import (
 	"time"
 	"strconv"
 
-	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"dynamodb"
@@ -14,11 +13,12 @@ import (
 )
 
 
+//PlayerScore maps PLAYERSCORE table's items
 type PlayerScore struct {
 	PK      string     `json:"PK,omitempty"`
 	Name    string     `json:"NAME,omitempty"`
 	Score   int        `json:"SCORE,omitempty"`
-	UserId  string     `json:"USER_ID,omitempty"`
+	UserID  string     `json:"USER_ID,omitempty"`
 	EndDate *time.Time `json:"END_DATE,omitempty"`
 }
 
@@ -29,14 +29,15 @@ type PlayerScore struct {
 	}
 }*/
 
+//SaveNewPlayer saves the player name on dynamodb, then ask again the user for other players
 func SaveNewPlayer(req golexa.Request, resp *golexa.Response) {
 	name := req.Request.Intent.Slots["name"].Value
-	userId := req.Session.User.UserId
+	userID := req.Session.User.UserID
 
 	playerScore := PlayerScore{
-		PK:     userId + "_" + name,
+		PK:     userID + "_" + name,
 		Name:   name,
-		UserId: userId,
+		UserID: userID,
 	}
 
 	svc := dynamodb.GetDynamoInstance()
@@ -50,12 +51,13 @@ func SaveNewPlayer(req golexa.Request, resp *golexa.Response) {
 	resp.Ask(text)
 }
 
+//UpdatePlayerScore updates the player's score, then wait for the user to take other scores
 func UpdatePlayerScore(req golexa.Request, resp *golexa.Response) {
 	score, err := strconv.Atoi(req.Request.Intent.Slots["score"].Value)
 	name := req.Request.Intent.Slots["name"].Value
-	userId := req.Session.User.UserId
+	userID := req.Session.User.UserID
 
-	keys := PlayerScore{PK: userId + "_" + name}
+	keys := PlayerScore{PK: userID + "_" + name}
 	values := map[string]int{":score": score}
 
 	svc := dynamodb.GetDynamoInstance()
@@ -69,14 +71,15 @@ func UpdatePlayerScore(req golexa.Request, resp *golexa.Response) {
 	resp.Ask(text)
 }
 
+//ReadScore reads the scores of all the players associated to the alexa's userID
 func ReadScore(req golexa.Request, resp *golexa.Response) {
-	userId := req.Session.User.UserId
-	values := map[string]string{":userId": userId}
+	userID := req.Session.User.UserID
+	values := map[string]string{":userID": userID}
 
-	queryExp := "USER_ID = :userId"
+	queryExp := "USER_ID = :userID"
 
 	svc := dynamodb.GetDynamoInstance()
-	results, err := dynamodb.Query(svc, values, "PLAYERSCORE", queryExp, "userId-index")
+	results, err := dynamodb.Query(svc, values, "PLAYERSCORE", queryExp, "userID-index")
 
 	text := ""
 	if err != nil {
@@ -100,6 +103,7 @@ func ReadScore(req golexa.Request, resp *golexa.Response) {
 	resp.Say(text)
 }
 
+//HandlerRequest is the handler function of lambda
 func HandleRequest(ctx context.Context, req golexa.Request) (golexa.Response, error) {
 	// Use Spew to output the request for debugging purposes:
 	fmt.Println("---- Dumping Input Map: ----")
@@ -131,5 +135,5 @@ func HandleRequest(ctx context.Context, req golexa.Request) (golexa.Response, er
 }
 
 func main() {
-	lambda.Start(HandleRequest)
+	golexa.LambdaStart(HandleRequest)
 }

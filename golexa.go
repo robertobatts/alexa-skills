@@ -1,5 +1,9 @@
 package golexa
 
+import (
+	"github.com/aws/aws-lambda-go/lambda"
+)
+
 
 type OutputSpeech struct {
 	Type string `json:"type,omitempty"`
@@ -36,7 +40,7 @@ type Request struct {
 	Version string `json:"version"`
 	Session struct {
 		User struct {
-			UserId string `json:"userId"`
+			UserID string `json:"userId"`
 		} `json:"userId"`
 	} `json:"session"`
 	Request struct {
@@ -81,4 +85,8 @@ func (resp *Response) Ask(text string) {
 		},
 	}
 	resp.Response.ShouldEndSession = false
+}
+
+func LambdaStart(handlerFunc interface{}) {
+	lambda.Start(handlerFunc)
 }
