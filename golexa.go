@@ -1,6 +1,9 @@
 package golexa
 
 import (
+	"fmt"
+	"context"
+	"errors"
 	"github.com/aws/aws-lambda-go/lambda"
 )
 
@@ -18,6 +21,7 @@ type AlexaResponse struct {
 	Response 					*Response 				`json:"response"`
 }
 
+//Session contains the session data of the request
 type Session struct {
 	New        bool   `json:"new"`
 	SessionID  string `json:"sessionId"`
@@ -33,6 +37,7 @@ type Session struct {
 	} `json:"application"`
 }
 
+//Request contains main data of the AlexaRequest
 type Request struct {
 	Locale			string 	`json:"locale"`
 	Type   			string 	`json:"type"`
@@ -43,6 +48,7 @@ type Request struct {
 	Name 				string 	`json:"name"`
 }
 
+//Response contains main data of the AlexaResponse
 type Response struct {
 	OutputSpeech     *OutputSpeech `json:"outputSpeech,omitempty"`
 	Reprompt         *Reprompt     `json:"reprompt,omitempty"`
@@ -51,6 +57,7 @@ type Response struct {
 	ShouldEndSession bool          `json:"shouldEndSession,omitempty"`
 }
 
+//Intent contained the intent detected by Alexa
 type Intent struct {
 	Name               string                `json:"name"`
 	ConfirmationStatus string                `json:"confirmationstatus"`
@@ -93,6 +100,7 @@ type Resolutions struct {
 	} `json:"resolutionsPerAuthority"`
 }
 
+//Card contains data displayed by Alexa
 type Card struct {
 	Type    string `json:"type"`
 	Title   string `json:"title,omitempty"`
@@ -104,6 +112,39 @@ type Card struct {
 	} `json:"image,omitempty"`
 }
 
+//Triggerable contains the definition of the functions triggered by Handle()
+type Triggerable interface {
+	OnLaunch(ctx context.Context, req *AlexaRequest, resp *AlexaResponse) error
+	OnIntent(ctx context.Context, req *AlexaRequest, resp *AlexaResponse) error
+}
+
+//Golexa is the container that implements the triggerable functions
+type Golexa struct {
+	Triggerable Triggerable
+}
+
+//Handle triggers the triggerable function by looking at the request
+func (golexa *Golexa) Handle(ctx context.Context, req *AlexaRequest) (*AlexaResponse, error) {
+
+	resp := CreateResponse()
+
+	switch req.Request.Type {
+		case "LaunchRequest":
+			err := golexa.Triggerable.OnLaunch(ctx, req, resp)
+			if err != nil {
+				fmt.Println("Error on launch: " + err.Error())
+			}
+			return resp, err
+		case "IntentRequest":
+			err := golexa.Triggerable.OnIntent(ctx, req, resp)
+			if err != nil {
+				fmt.Println("Error on launch: " + err.Error())
+			}
+			return resp, err
+		default:
+			return resp, errors.New("Request type not recognized")
+	}
+}
 
 //CreateResponse initialize the Alexa Response
 func CreateResponse() *AlexaResponse {
