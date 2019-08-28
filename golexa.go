@@ -114,8 +114,8 @@ type Card struct {
 
 //Triggerable contains the definition of the functions triggered by Handle()
 type Triggerable interface {
-	OnLaunch(ctx context.Context, req *AlexaRequest, resp *AlexaResponse) error
-	OnIntent(ctx context.Context, req *AlexaRequest, resp *AlexaResponse) error
+	OnLaunch(ctx context.Context, req AlexaRequest, resp *AlexaResponse) error
+	OnIntent(ctx context.Context, req AlexaRequest, resp *AlexaResponse) error
 }
 
 //Golexa is the container that implements the triggerable functions
@@ -124,7 +124,7 @@ type Golexa struct {
 }
 
 //Handle triggers the triggerable function by looking at the request
-func (golexa *Golexa) Handle(ctx context.Context, req *AlexaRequest) (*AlexaResponse, error) {
+func (golexa *Golexa) Handle(ctx context.Context, req AlexaRequest) (*AlexaResponse, error) {
 
 	resp := CreateResponse()
 

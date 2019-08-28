@@ -6,11 +6,16 @@ import (
 	"time"
 	"strconv"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"dynamodb"
 	"golexa"
 )
+
+var gxa = &golexa.Golexa { Triggerable: &Scorekeeper{} }
+
+//Scorekeeper is useful to override the Triggerable methods
+type Scorekeeper struct {
+}
 
 
 //PlayerScore maps PLAYERSCORE table's items
@@ -21,7 +26,6 @@ type PlayerScore struct {
 	UserID  string     `json:"USER_ID,omitempty"`
 	EndDate *time.Time `json:"END_DATE,omitempty"`
 }
-
 
 /*func (resp *golexa.AlexaResponse) SavePlayerNumbers(req golexa.AlexaRequest) {
 	resp.SessionAttributes = map[string]string {
@@ -103,20 +107,15 @@ func ReadScore(req golexa.AlexaRequest, resp *golexa.AlexaResponse) {
 	resp.Say(text)
 }
 
-//HandlerRequest is the handler function of lambda
-func HandleRequest(ctx context.Context, req golexa.AlexaRequest) (golexa.AlexaResponse, error) {
-	// Use Spew to output the request for debugging purposes:
-	fmt.Println("---- Dumping Input Map: ----")
-	spew.Dump(req)
+//OnLaunch overrides Triggerable.OnLaunch
+func (scorekeeper *Scorekeeper) OnLaunch(ctx context.Context, req golexa.AlexaRequest, resp *golexa.AlexaResponse) error {
+	resp.Ask("What are the players names?")
 
-	resp := golexa.CreateResponse()
+	return nil
+}
 
-	if req.Request.Type == "LaunchRequest" {
-		resp.Ask("What are the players names?")
-
-		return *resp, nil
-	}
-
+//OnIntent overrides Tribgerable.OnIntent
+func (scorekeeper *Scorekeeper) OnIntent(ctx context.Context, req golexa.AlexaRequest, resp *golexa.AlexaResponse) error {
 	switch req.Request.Intent.Name {
 	case "addplayer":
 		SaveNewPlayer(req, resp)
@@ -130,10 +129,11 @@ func HandleRequest(ctx context.Context, req golexa.AlexaRequest) (golexa.AlexaRe
 	default:
 		resp.Say("I'm sorry, the input does not look like something I understand.")
 	}
-
-	return *resp, nil
+	
+	return nil
 }
 
+
 func main() {
-	golexa.LambdaStart(HandleRequest)
+	golexa.LambdaStart(gxa.Handle)
 }
