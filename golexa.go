@@ -146,7 +146,7 @@ func (golexa *Golexa) Handle(ctx context.Context, req AlexaRequest) (*AlexaRespo
 	}
 }
 
-//CreateResponse initialize the Alexa Response
+//CreateResponse initializes the Alexa Response
 func CreateResponse() *AlexaResponse {
 	var resp AlexaResponse
 	resp.Version = "2.0"
@@ -154,7 +154,7 @@ func CreateResponse() *AlexaResponse {
 	return &resp
 }
 
-//Say make Alexa say something to the user
+//Say makes Alexa say something to the user
 func (resp *AlexaResponse) Say(text string) {
 	resp.Response.OutputSpeech = &OutputSpeech{
 		Type: "PlainText",
@@ -162,7 +162,7 @@ func (resp *AlexaResponse) Say(text string) {
 	}
 }
 
-//Ask make Alexa ask something to the user
+//Ask makes Alexa ask something to the user
 func (resp *AlexaResponse) Ask(text string) {
 	resp.Response.Reprompt = &Reprompt{
 		OutputSpeech: OutputSpeech{
@@ -173,7 +173,7 @@ func (resp *AlexaResponse) Ask(text string) {
 	resp.Response.ShouldEndSession = false
 }
 
-//LambdaStart pass the function to be triggered to lambda
-func LambdaStart(handlerFunc interface{}) {
-	lambda.Start(handlerFunc)
+//LambdaStart passes the function to be triggered to lambda
+func LambdaStart(gxa *Golexa) {
+	lambda.Start(gxa.Handle)
 }
