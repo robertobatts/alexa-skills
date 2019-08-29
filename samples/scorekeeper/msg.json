@@ -1,0 +1,44 @@
+{
+    "en-AU": {
+        "playernames": "What are the players names?",
+        "errorTryAgain": "There has been an error! Try again",
+        "dontUnderstand": "I'm sorry, the input does not look like something I understand.",
+        "has": "has",
+        "points": "points"
+    },
+    "en-CA": {
+        "playernames": "What are the players names?",
+        "errorTryAgain": "There has been an error! Try again",
+        "dontUnderstand": "I'm sorry, the input does not look like something I understand.",
+        "has": "has",
+        "points": "points"
+    },
+    "en-GB": {
+        "playernames": "What are the players names?",
+        "errorTryAgain": "There has been an error! Try again",
+        "dontUnderstand": "I'm sorry, the input does not look like something I understand.",
+        "has": "has",
+        "points": "points"
+    },
+    "en-IN": {
+        "playernames": "What are the players names?",
+        "errorTryAgain": "There has been an error! Try again",
+        "dontUnderstand": "I'm sorry, the input does not look like something I understand.",
+        "has": "has",
+        "points": "points"
+    },
+    "en-US": {
+        "playernames": "What are the players names?",
+        "errorTryAgain": "There has been an error! Try again",
+        "dontUnderstand": "I'm sorry, the input does not look like something I understand.",
+        "has": "has",
+        "points": "points"
+    },
+    "it-IT": {
+        "playernames": "Come si chiamano",
+        "errorTryAgain": "C'è stato un errore! Riprova",
+        "dontUnderstand": "Mi dispiace, non ho capito cosa hai detto",
+        "has": "ha",
+        "points": "punti"
+    }
+}

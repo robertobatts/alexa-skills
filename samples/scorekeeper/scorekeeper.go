@@ -2,21 +2,23 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
-	"time"
+	"io/ioutil"
 	"strconv"
+	"time"
 
-	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"dynamodb"
 	"golexa"
+
+	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 )
 
-var gxa = &golexa.Golexa { Triggerable: &Scorekeeper{} }
+var gxa = &golexa.Golexa{Triggerable: &Scorekeeper{}, TranslationMap: GetjsonMap("./msg.json")}
 
 //Scorekeeper is useful to override the Triggerable methods
 type Scorekeeper struct {
 }
-
 
 //PlayerScore maps PLAYERSCORE table's items
 type PlayerScore struct {
@@ -32,6 +34,14 @@ type PlayerScore struct {
 		"number": req.Request.Intent.Slots["number"].Value,
 	}
 }*/
+
+//GetJsonMap transforms the json file into a
+func GetJsonMap(path string) map[string]map[string]string {
+	jsonMap := map[string]map[string]string{}
+	raw, _ := ioutil.ReadFile(path)
+	json.Unmarshal(raw, &jsonMap)
+	return jsonMap
+}
 
 //SaveNewPlayer saves the player name on dynamodb, then ask again the user for other players
 func SaveNewPlayer(req golexa.AlexaRequest, resp *golexa.AlexaResponse) {
@@ -96,12 +106,12 @@ func ReadScore(req golexa.AlexaRequest, resp *golexa.AlexaResponse) {
 			err = dynamodbattribute.UnmarshalMap(i, &item)
 
 			if err != nil {
-					fmt.Println("Got error unmarshalling:")
-					fmt.Println(err.Error())
+				fmt.Println("Got error unmarshalling:")
+				fmt.Println(err.Error())
 			} else {
 				text += item.Name + " has " + strconv.Itoa(item.Score) + " points, "
-			}	
-			
+			}
+
 		}
 	}
 	resp.Say(text)
@@ -129,10 +139,9 @@ func (scorekeeper *Scorekeeper) OnIntent(ctx context.Context, req golexa.AlexaRe
 	default:
 		resp.Say("I'm sorry, the input does not look like something I understand.")
 	}
-	
+
 	return nil
 }
-
 
 func main() {
 	golexa.LambdaStart(*gxa)
