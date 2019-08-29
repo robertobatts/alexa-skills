@@ -1,24 +1,25 @@
 package golexa
 
 import (
-	"fmt"
 	"context"
 	"errors"
+	"fmt"
+
 	"github.com/aws/aws-lambda-go/lambda"
 )
 
 //AlexaRequest defines the json passed from Alexa when the skill is called
 type AlexaRequest struct {
-	Version string 		`json:"version"`
-	Session *Session	`json:"session"`
+	Version string   `json:"version"`
+	Session *Session `json:"session"`
 	Request *Request `json:"request"`
 }
 
-//AlexaResponse defines the json passed to Alexa 
+//AlexaResponse defines the json passed to Alexa
 type AlexaResponse struct {
 	Version           string            `json:"version"`
 	SessionAttributes map[string]string `json:"sessionAttributes,omitempty"`
-	Response 					*Response 				`json:"response"`
+	Response          *Response         `json:"response"`
 }
 
 //Session contains the session data of the request
@@ -39,13 +40,13 @@ type Session struct {
 
 //Request contains main data of the AlexaRequest
 type Request struct {
-	Locale			string 	`json:"locale"`
-	Type   			string 	`json:"type"`
-	Time   			string 	`json:"timestamp"`
-	RequestID   string 	`json:"requestId"`
-	DialogState string 	`json:"dialogState"`
-	Intent 			Intent `json:"intent"`
-	Name 				string 	`json:"name"`
+	Locale      string `json:"locale"`
+	Type        string `json:"type"`
+	Time        string `json:"timestamp"`
+	RequestID   string `json:"requestId"`
+	DialogState string `json:"dialogState"`
+	Intent      Intent `json:"intent"`
+	Name        string `json:"name"`
 }
 
 //Response contains main data of the AlexaResponse
@@ -120,30 +121,38 @@ type Triggerable interface {
 
 //Golexa is the container that implements the triggerable functions
 type Golexa struct {
-	Triggerable Triggerable
+	Triggerable    Triggerable
+	AlexaRequest   *AlexaRequest
+	TranslationMap map[string]map[string]string
 }
 
 //Handle triggers the triggerable function by looking at the request
-func (golexa *Golexa) Handle(ctx context.Context, req AlexaRequest) (*AlexaResponse, error) {
-
+func (golexa *Golexa) Handle(ctx context.Context, req *AlexaRequest) (*AlexaResponse, error) {
+	golexa.AlexaRequest = req
 	resp := CreateResponse()
 
 	switch req.Request.Type {
-		case "LaunchRequest":
-			err := golexa.Triggerable.OnLaunch(ctx, req, resp)
-			if err != nil {
-				fmt.Println("Error on launch: " + err.Error())
-			}
-			return resp, err
-		case "IntentRequest":
-			err := golexa.Triggerable.OnIntent(ctx, req, resp)
-			if err != nil {
-				fmt.Println("Error on launch: " + err.Error())
-			}
-			return resp, err
-		default:
-			return resp, errors.New("Request type not recognized")
+	case "LaunchRequest":
+		err := golexa.Triggerable.OnLaunch(ctx, *req, resp)
+		if err != nil {
+			fmt.Println("Error on launch: " + err.Error())
+		}
+		return resp, err
+	case "IntentRequest":
+		err := golexa.Triggerable.OnIntent(ctx, *req, resp)
+		if err != nil {
+			fmt.Println("Error on launch: " + err.Error())
+		}
+		return resp, err
+	default:
+		return resp, errors.New("Request type not recognized")
 	}
+}
+
+func (golexa *Golexa) Translate(key string) string {
+	language := golexa.AlexaRequest.Request.Locale
+
+	return golexa.TranslationMap[language][key]
 }
 
 //CreateResponse initializes the Alexa Response
