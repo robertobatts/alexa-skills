@@ -80,7 +80,7 @@ func UpdatePlayerScore(req golexa.AlexaRequest, resp *golexa.AlexaResponse) {
 	text := ""
 	if err != nil {
 		fmt.Println(err.Error())
-		text = "There has been an error! Try again"
+		text = gxa.Translate("errorTryAgain")
 	}
 	resp.Ask(text)
 }
@@ -109,7 +109,7 @@ func ReadScore(req golexa.AlexaRequest, resp *golexa.AlexaResponse) {
 				fmt.Println("Got error unmarshalling:")
 				fmt.Println(err.Error())
 			} else {
-				text += item.Name + " has " + strconv.Itoa(item.Score) + " points, "
+				text += item.Name + " " + gxa.Translate("has") + " " + strconv.Itoa(item.Score) + " " + gxa.Translate("points") + ", "
 			}
 
 		}
@@ -119,7 +119,7 @@ func ReadScore(req golexa.AlexaRequest, resp *golexa.AlexaResponse) {
 
 //OnLaunch overrides Triggerable.OnLaunch
 func (scorekeeper *Scorekeeper) OnLaunch(ctx context.Context, req golexa.AlexaRequest, resp *golexa.AlexaResponse) error {
-	resp.Ask("What are the players names?")
+	resp.Ask(gxa.Translate("playerNames"))
 
 	return nil
 }
@@ -137,7 +137,7 @@ func (scorekeeper *Scorekeeper) OnIntent(ctx context.Context, req golexa.AlexaRe
 		resp.Say("")
 		//TODO
 	default:
-		resp.Say("I'm sorry, the input does not look like something I understand.")
+		resp.Say(gxa.Translate("dontUnderstand"))
 	}
 
 	return nil
