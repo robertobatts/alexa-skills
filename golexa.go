@@ -183,6 +183,6 @@ func (resp *AlexaResponse) Ask(text string) {
 }
 
 //LambdaStart passes the function to be triggered to lambda
-func LambdaStart(gxa *Golexa) {
-	lambda.Start(gxa.Handle)
+(golexa *Golexa) LambdaStart() {
+	lambda.Start(golexa.Handle)
 }
