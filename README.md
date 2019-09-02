@@ -1,7 +1,7 @@
 # golexa
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/cc64a91c4de74032bf559c98f6a78cdf)](https://app.codacy.com/app/battaroberto/golexa?utm_source=github.com&utm_medium=referral&utm_content=robertobatts/golexa&utm_campaign=Badge_Grade_Dashboard)
-[![Codacy](https://img.shields.io/badge/Code%20Quality%20A-success.svg)](https://app.codacy.com/project/battaroberto/golexa/dashboard?bid=13997035) [![License](https://img.shields.io/badge/License-MPL%202.0-blue.svg)](https://www.mozilla.org/en-US/MPL/2.0/FAQ/)
+[![License](https://img.shields.io/badge/License-MPL%202.0-blue.svg)](https://www.mozilla.org/en-US/MPL/2.0/FAQ/)
 
 ## Usage
 
