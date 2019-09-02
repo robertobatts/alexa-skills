@@ -144,5 +144,5 @@ func (scorekeeper *Scorekeeper) OnIntent(ctx context.Context, req golexa.AlexaRe
 }
 
 func main() {
-	golexa.LambdaStart(*gxa)
+	gxa.LambdaStart()
 }
