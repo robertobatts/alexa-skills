@@ -8,8 +8,8 @@ import (
 	"strconv"
 	"time"
 
-	"dynamodb"
-	"golexa"
+	"github.com/robertobatts/golexa/"
+	"github.com/robertobatts/golexa/samples/scorekeeper/dynamodb"
 
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 )
